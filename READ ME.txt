@@ -1,0 +1,411 @@
+# UMMKOV v1.0.0 — Inquiry and Transactional Bot
+
+This is a production-ready AI and transaction management system that handles:
+- **AI Chat** (understand needs, recommend packages)
+- **Bookings** (create, hold, cancel)
+- **Ancillaries** (insurance, visas, upgrades)
+- **Payments** (generate links, track)
+- **Support** (custom requests, agent handoff)
+
+---
+
+## What's New (vs Basic Version)
+
+| Features             | Basic  |Enhanced |
+|----------------------|--------|---------|
+| Chat with AI         |   ✓   |    ✓    |
+| Understand needs     |   ✓   |    ✓    |
+| Menu interface       |   ✗   |    ✓    |
+| Get confirmation     |   ✗   |    ✓    |
+| Hold booking         |   ✗   |    ✓    |
+| Cancel booking       |   ✗   |    ✓    |
+| Add ancillaries      |   ✗   |    ✓    |
+| Generate payment     |   ✗   |    ✓    |
+| Support tickets      |   ✗   |    ✓    |
+| Transaction DB       |   ✗   |    ✓    |
+
+---
+
+## Architecture
+
+```
+User
+ ↓
+┌─────────────────────────┐
+│  Inquiry Chat (AI)      │  ← First conversation
+│  - Understand needs     │  ← Ask questions
+│  - Recommend packages   │  ← Suggest options
+└─────────────────────────┘
+ ↓
+┌─────────────────────────┐
+│  Menu of Actions        │  ← Menu interface
+│  - Get Confirmation     │
+│  - Hold Booking         │
+│  - Cancel Booking       │
+│  - Add Ancillaries      │
+│  - Payment Link         │
+│  - Custom Request       │
+└─────────────────────────┘
+ ↓
+┌─────────────────────────┐
+│  Transaction Layer      │  ← Actual operations
+│  - Process booking      │
+│  - Track refunds        │
+│  - Generate payment     │
+│  - Create support       │
+└─────────────────────────┘
+ ↓
+┌─────────────────────────┐
+│  Database Layer         │  ← SQLite
+│  - Conversations        │
+│  - Bookings             │
+│  - Holds                │
+│  - Payments             │
+│  - Support Tickets      │
+└─────────────────────────┘
+```
+
+---
+
+## API Endpoints
+
+### Chat Endpoints
+
+**POST /chat** — Talk to AI
+```bash
+curl -X POST http://localhost:8000/chat \
+  -H "X-API-Key: mkov-dev-key-2026" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "message": "I want to go to Bali",
+    "session_id": "optional-id"
+  }'
+'''
+
+Response:
+```json
+{
+  "reply": "That's wonderful! Bali is stunning...",
+  "session_id": "abc123",
+  "suggested_actions": [
+    {
+      "action": "hold_booking",
+      "label": "Hold This Package"
+    }
+  ]
+}
+```
+
+### Action Endpoints
+
+**POST /menu/{session_id}** — Show quick action menu
+```bash
+curl -X POST http://localhost:8000/menu/abc123 \
+  -H "X-API-Key: mkov-dev-key-2026"
+```
+
+Response:
+```json
+{
+  "session_id": "abc123",
+  "greeting": "Welcome Travel Partner! 👋",
+  "quick_actions": [
+    {
+      "id": "get_confirmation",
+      "label": "📋 Get Booking Confirmation",
+      "action": "get_confirmation"
+    },
+    {
+      "id": "hold_booking",
+      "label": "🔒 Hold / Reserve Package",
+      "action": "hold_booking"
+    },
+    ...
+  ]
+}
+```
+
+**POST /action** — Execute action
+```bash
+curl -X POST http://localhost:8000/action \
+  -H "X-API-Key: mkov-dev-key-2026" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "action": "hold_booking",
+    "session_id": "abc123",
+    "details": {
+      "destination": "Bali",
+      "travel_dates": "Feb 15-25",
+      "duration_hours": 24
+    }
+  }'
+```
+
+Response:
+```json
+{
+  "status": "success",
+  "action": "hold_booking",
+  "message": "🔒 BOOKING HELD\n\nHold ID: HOLD-ABC123\nDestination: Bali\nHold Valid For: 24 hours",
+  "data": {
+    "hold_id": "HOLD-ABC123",
+    "hold_expiry_hours": 24
+  }
+}
+```
+
+---
+
+## Supported Actions
+
+### 1. Get Booking Confirmation
+Retrieve existing booking details.
+```json
+{
+  "action": "get_confirmation",
+  "session_id": "abc123",
+  "booking_id": "BK-001"
+}
+```
+
+### 2. Hold Booking (Reserve 24 hours)
+Reserve a package without payment.
+```json
+{
+  "action": "hold_booking",
+  "session_id": "abc123",
+  "details": {
+    "destination": "Bali",
+    "travel_dates": "Feb 15-25",
+    "duration_hours": 24
+  }
+}
+```
+
+### 3. Cancel Booking
+Process cancellation and calculate refund.
+```json
+{
+  "action": "cancel_booking",
+  "session_id": "abc123",
+  "booking_id": "BK-001",
+  "details": {
+    "reason": "Emergency work"
+  }
+}
+```
+
+### 4. Add Ancillary
+Add travel insurance, visa, upgrades, etc.
+```json
+{
+  "action": "add_ancillary",
+  "session_id": "abc123",
+  "booking_id": "BK-001",
+  "details": {
+    "type": "travel_insurance",  // or visa_assistance, hotel_upgrade, etc.
+    "details": {"coverage": "full"}
+  }
+}
+```
+
+### 5. Generate Payment Link
+Create payment link for booking.
+```json
+{
+  "action": "payment_link",
+  "session_id": "abc123",
+  "details": {
+    "booking_id": "BK-001"
+  }
+}
+```
+
+### 6. Custom Request
+Create support ticket for complex requests.
+```json
+{
+  "action": "custom_request",
+  "session_id": "abc123",
+  "details": {
+    "request_text": "Group of 50 people, need corporate package"
+  }
+}
+```
+
+---
+
+## Setup & Run
+
+### Install
+```bash
+pip install -r requirements.txt
+```
+
+### Configure
+```bash
+cp .env.example .env
+# Edit .env with your OpenAI API key
+```
+
+### Run
+```bash
+uvicorn main:app --reload
+```
+
+Visit: `http://localhost:8000/docs` for interactive API testing
+
+### Test
+```bash
+python example_flow.py
+```
+
+Shows 4 complete customer journeys:
+1. Inquiry → Hold → Payment
+2. Check confirmation → Add ancillaries
+3. Cancellation → Refund
+4. Custom request → Support ticket
+
+---
+
+## Database Schema
+
+10 tables track everything:
+
+```
+conversations      — All chat history
+api_keys          — Authentication
+leads             — Lead information
+bookings          — Confirmed bookings
+holds             — 24-hour reservations
+ancillaries       — Add-ons (insurance, upgrades)
+payments          — Payment tracking
+support_tickets   — Custom requests
+extracted_data    — Structured lead info
+```
+
+---
+
+## Integration Examples
+
+### WhatsApp (Twilio)
+```python
+from twilio.twiml.messaging_response import MessagingResponse
+import requests
+
+def handle_whatsapp(msg):
+    # Call the /chat endpoint
+    response = requests.post(
+        "http://api.mkov.com/chat",
+        headers={"X-API-Key": "key"},
+        json={"message": msg, "session_id": phone}
+    )
+    reply = response.json()["reply"]
+    
+    # Send back via Twilio
+    twiml = MessagingResponse()
+    twiml.message(reply)
+    return str(twiml)
+```
+
+### Website Widget
+```html
+<div id="mkov-chat-widget">
+  <iframe src="http://api.mkov.com/widget/abc123"></iframe>
+</div>
+
+<script>
+  // Get menu
+  fetch('http://api.mkov.com/menu/abc123', {
+    headers: {'X-API-Key': 'key'}
+  }).then(r => r.json()).then(menu => {
+    // Render quick action buttons
+    menu.quick_actions.forEach(action => {
+      // Create button, attach handler
+    });
+  });
+</script>
+```
+
+### Mobile App
+```python
+# Same API, different UI
+# Android/iOS apps call:
+# POST /chat
+# POST /menu/{session_id}
+# POST /action
+# Same backends, different frontends
+```
+
+---
+
+## Deployment
+
+### Railway.app (Recommended)
+```bash
+git push railway main
+# Automatically deploys
+# Sets env vars via dashboard
+```
+
+### Docker
+```bash
+docker build -t mkov-ai .
+docker run -e OPENAI_API_KEY=sk-xxx mkov-ai
+```
+
+### Traditional Server
+```bash
+# Install Python 3.10+
+pip install -r requirements.txt
+nohup uvicorn main:app --host 0.0.0.0 --port 8000 &
+```
+
+---
+
+## Cost Breakdown
+
+| Item | Cost |
+|------|------|
+| OpenAI gpt-4o-mini (per message) | $0.00015 |
+| 100 conversations/day | ~$1.50/day |
+| Monthly (3000 conversations) | ~$45 |
+| Deployment (Railway/Render free) | $0 |
+| Database (SQLite) | $0 |
+| **Total/Month** | **~$50** |
+
+---
+
+## What's Next
+
+**Phase 2:**
+- Fine-tune Llama 3 on MKOV conversations
+- Add video/image support for package showcase
+- Multi-language support (Hindi, Spanish, German)
+- Advanced analytics (customer insights, peak seasons)
+
+**Phase 3:**
+- Marketplace integration (aggregate multiple agencies)
+- AI pricing optimization
+- Predictive customer churn
+
+---
+
+## File Structure
+
+```
+mkov-enhanced/
+├── main.py              ← FastAPI with menu + action routes
+├── ai_engine.py         ← OpenAI chat logic
+├── actions.py           ← Booking, cancellation, ancillary handlers
+├── config.py            ← System prompt + settings
+├── database.py          ← SQLite schema (10 tables)
+├── memory.py            ← Conversation storage
+├── auth.py              ← API key verification
+├── example_flow.py      ← 4 example customer journeys
+├── requirements.txt     ← Dependencies
+├── .env.example         ← Secrets template
+├── Procfile             ← For Railway deployment
+└── README.md
+```
+Collaborators :- Adityaveer Singh Chauhan (Lead Coder) and Jain Satvik
