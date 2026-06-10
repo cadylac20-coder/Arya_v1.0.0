@@ -386,28 +386,19 @@
         }
 
         function closeChat() {
-            console.log('Close button clicked'); // For debugging
-            
             if (window.parent !== window) {
-        // Send message to parent (WordPress page)
-                window.parent.postMessage({ 
-                    action: 'close',
-                    source: 'umkov-widget'
-                }, '*');
-                // Also hide from inside as backup
-                const widget = document.querySelector('.chat-widget');
-                if (widget) widget.style.display = 'none';
+                // Running in iframe — close parent
+                window.parent.postMessage({ action: 'close' }, '*');
             } else {
-                // Standalone fallback
-                const widget = document.querySelector('.chat-widget');
-                if (widget) widget.style.display = 'none';
+                // Running standalone — redirect or hide
+                window.location.href = '/';
             }
         }
 
-        // Listen for messages from parent (in case you want to reopen etc.)
+        // Listen for close messages from parent
         window.addEventListener('message', (event) => {
-            if (event.data.action === 'show') {
-                document.querySelector('.chat-widget').style.display = 'flex';
+            if (event.data.action === 'close') {
+                document.body.style.display = 'none';
             }
         });
     </script>
