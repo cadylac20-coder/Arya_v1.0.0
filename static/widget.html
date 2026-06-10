@@ -13,7 +13,7 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #f7f7f7;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -37,16 +37,18 @@
         .chat-header {
             background: linear-gradient(135deg, #0f3c7d 0%, #1a5a96 100%);
             color: white;
-            padding: 20px;
+            padding: 16px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            gap: 12px;
         }
 
         .header-title {
             display: flex;
             align-items: center;
             gap: 12px;
+            flex: 1;
         }
 
         .avatar {
@@ -59,6 +61,7 @@
             justify-content: center;
             font-weight: bold;
             font-size: 20px;
+            flex-shrink: 0;
         }
 
         .title-text h2 {
@@ -77,16 +80,17 @@
             background: none;
             border: none;
             color: white;
-            font-size: 28px;
+            font-size: 24px;
             cursor: pointer;
-            padding: 0;
-            width: 40px;
-            height: 40px;
+            padding: 4px 8px;
+            width: auto;
+            height: auto;
             display: flex;
             align-items: center;
             justify-content: center;
             border-radius: 4px;
             transition: background 0.2s ease;
+            flex-shrink: 0;
         }
 
         .close-btn:hover {
@@ -141,13 +145,11 @@
         .assistant .message-bubble {
             background: #e8e8e8;
             color: #333;
-            border-radius: 16px 16px 16px 2px;
         }
 
         .user .message-bubble {
             background: #0f3c7d;
             color: white;
-            border-radius: 16px 16px 2px 16px;
         }
 
         .typing-indicator {
@@ -155,7 +157,7 @@
             gap: 4px;
             padding: 12px 16px;
             background: #e8e8e8;
-            border-radius: 16px 16px 16px 2px;
+            border-radius: 16px;
             width: fit-content;
         }
 
@@ -188,12 +190,6 @@
             gap: 8px;
         }
 
-        .input-group {
-            display: flex;
-            gap: 8px;
-            flex: 1;
-        }
-
         input[type="text"] {
             flex: 1;
             border: 1px solid #d0d0d0;
@@ -221,6 +217,7 @@
             justify-content: center;
             font-size: 18px;
             transition: background 0.2s;
+            flex-shrink: 0;
         }
 
         button:hover {
@@ -237,15 +234,6 @@
             padding: 20px;
             color: #999;
         }
-
-        .error-message {
-            background: #fee;
-            color: #c33;
-            padding: 12px;
-            border-radius: 8px;
-            margin: 10px 0;
-            font-size: 13px;
-        }
     </style>
 </head>
 <body>
@@ -259,7 +247,7 @@
                     <p>🟢 Online 24/7</p>
                 </div>
             </div>
-            <button class="close-btn" id="closeBtn" aria-label="Close chat">✕</button>
+            <button class="close-btn" id="closeBtn" title="Close chat">✕</button>
         </div>
 
         <!-- Chat Body -->
@@ -269,15 +257,13 @@
 
         <!-- Chat Footer -->
         <div class="chat-footer">
-            <div class="input-group">
-                <input 
-                    type="text" 
-                    id="messageInput" 
-                    placeholder="Ask about destinations, packages, visas..." 
-                    autocomplete="off"
-                >
-                <button id="sendBtn" aria-label="Send message">➤</button>
-            </div>
+            <input 
+                type="text" 
+                id="messageInput" 
+                placeholder="Ask about destinations, packages, visas..." 
+                autocomplete="off"
+            >
+            <button id="sendBtn" title="Send message">➤</button>
         </div>
     </div>
 
@@ -298,8 +284,24 @@
         // Load initial greeting
         window.addEventListener('load', async () => {
             chatBody.innerHTML = '';
-            addAssistantMessage('Welcome to UMKOV! 👋\n\nI\'m your travel assistant. What kind of trip are you dreaming of?');
+            addAssistantMessage('Namaste! 🙏 Welcome to Uniglobe MKOV Travel.\n\nI\'m UMKOV, your personal travel consultant.\n\nWhat kind of trip are you dreaming of?');
         });
+
+        // Close button - send message to parent
+        closeBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            closeChat();
+        });
+
+        function closeChat() {
+            // If in iframe, tell parent to close
+            if (window.parent && window.parent !== window) {
+                window.parent.postMessage({ action: 'close_umkov' }, '*');
+            }
+            // Also hide self
+            document.body.style.display = 'none';
+        }
 
         // Send message on Enter or button click
         messageInput.addEventListener('keypress', (e) => {
@@ -310,7 +312,6 @@
         });
 
         sendBtn.addEventListener('click', sendMessage);
-        closeBtn.addEventListener('click', closeChat);
 
         async function sendMessage() {
             const message = messageInput.value.trim();
@@ -384,23 +385,6 @@
             div.textContent = text;
             return div.innerHTML;
         }
-
-        function closeChat() {
-            if (window.parent !== window) {
-                // Running in iframe — close parent
-                window.parent.postMessage({ action: 'close' }, '*');
-            } else {
-                // Running standalone — redirect or hide
-                window.location.href = '/';
-            }
-        }
-
-        // Listen for close messages from parent
-        window.addEventListener('message', (event) => {
-            if (event.data.action === 'close') {
-                document.body.style.display = 'none';
-            }
-        });
     </script>
 </body>
 </html>
