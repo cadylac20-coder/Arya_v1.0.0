@@ -1,406 +1,481 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UMKOV — Travel Assistant</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shaina — MKOV Travel Assistant</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=Cormorant+Garamond:wght@500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --navy:       #0d3055;
+  --navy-mid:   #1a5a8a;
+  --navy-light: #2678b5;
+  --teal:       #0ab5a4;
+  --gold:       #e8b84b;
+  --white:      #ffffff;
+  --off:        #f6f8fb;
+  --border:     rgba(13,48,85,0.12);
+  --text:       #1a2b3c;
+  --muted:      #6b7f8f;
+  --light-txt:  #9bb0c1;
+  --shadow-sm:  0 2px 12px rgba(13,48,85,0.10);
+  --shadow-lg:  0 20px 60px rgba(13,48,85,0.22);
+  --r:          16px;
+  --r-sm:       10px;
+  --ease:       0.22s cubic-bezier(0.4,0,0.2,1);
+}
+body { background: transparent; font-family: 'DM Sans', sans-serif; overflow: hidden; }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-        }
+/* ── Launcher ────────────────────────────────────────────────────────────── */
+#shaina-launcher {
+  position: fixed; bottom: 24px; right: 24px; z-index: 9998;
+  display: flex; align-items: center; gap: 10px;
+  background: linear-gradient(135deg, var(--navy), var(--navy-mid));
+  color: var(--white); border: none; border-radius: 32px;
+  padding: 10px 18px 10px 10px; cursor: pointer;
+  box-shadow: 0 8px 28px rgba(13,48,85,0.30);
+  font-family: 'DM Sans', sans-serif; font-size: 13.5px; font-weight: 500;
+  transition: transform var(--ease), box-shadow var(--ease);
+  user-select: none;
+}
+#shaina-launcher:hover { transform: translateY(-3px); box-shadow: 0 14px 40px rgba(13,48,85,0.38); }
+#shaina-launcher:active { transform: translateY(0); }
 
-        .chat-widget {
-            width: 100%;
-            max-width: 460px;
-            height: 700px;
-            background: #ffffff;
-            border-radius: 12px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            position: relative;
-        }
+.lnch-avatar {
+  width: 38px; height: 38px; border-radius: 50%; overflow: hidden;
+  border: 2px solid rgba(255,255,255,0.3); flex-shrink: 0; position: relative;
+  background: var(--navy-light);
+}
+.lnch-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.lnch-pulse {
+  position: absolute; bottom: 0; right: 0;
+  width: 10px; height: 10px; background: #4ade80;
+  border-radius: 50%; border: 2px solid var(--white);
+}
+.lnch-text { display: flex; flex-direction: column; line-height: 1.2; }
+.lnch-text strong { font-size: 13.5px; font-weight: 500; }
+.lnch-text span   { font-size: 10.5px; opacity: 0.72; font-weight: 300; }
 
-        .chat-header {
-            background: linear-gradient(135deg, #0f3c7d 0%, #1a5a96 100%);
-            color: white;
-            padding: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+/* ── Widget panel ────────────────────────────────────────────────────────── */
+#shaina-widget {
+  position: fixed; bottom: 90px; right: 24px; z-index: 9999;
+  width: 400px; height: 600px;
+  border-radius: var(--r); overflow: hidden;
+  background: var(--white); box-shadow: var(--shadow-lg);
+  display: flex; flex-direction: column;
+  border: 1px solid var(--border);
+  transform: scale(0.9) translateY(24px); opacity: 0; pointer-events: none;
+  transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), opacity 0.22s ease;
+}
+#shaina-widget.open {
+  transform: scale(1) translateY(0); opacity: 1; pointer-events: all;
+}
+@media(max-width:480px){
+  #shaina-widget { width: calc(100vw - 16px); height: 88vh; right: 8px; bottom: 82px; }
+  #shaina-launcher { right: 12px; bottom: 12px; }
+}
 
-        .header-title {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
+/* ── Header ──────────────────────────────────────────────────────────────── */
+.s-header {
+  background: linear-gradient(135deg, var(--navy) 0%, #1a5a8a 60%, #1d6fa8 100%);
+  padding: 14px 16px; display: flex; align-items: center; gap: 12px;
+  flex-shrink: 0; position: relative; overflow: hidden;
+}
+.s-header::before { content:''; position:absolute; right:-20px; top:-20px; width:90px; height:90px; border-radius:50%; background:rgba(255,255,255,0.04); }
+.s-header::after  { content:''; position:absolute; right:25px; bottom:-30px; width:70px; height:70px; border-radius:50%; background:rgba(255,255,255,0.03); }
 
-        .avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 20px;
-        }
+.h-avatar {
+  width: 44px; height: 44px; border-radius: 50%; overflow: hidden;
+  border: 2.5px solid rgba(255,255,255,0.3); flex-shrink: 0; z-index: 1;
+  background: var(--navy-light);
+}
+.h-avatar img { width: 100%; height: 100%; object-fit: cover; }
 
-        .title-text h2 {
-            font-size: 16px;
-            margin: 0;
-            font-weight: 600;
-        }
+.h-info { flex: 1; z-index: 1; }
+.h-name { font-family: 'Cormorant Garamond', serif; color: var(--white); font-size: 17px; font-weight: 600; line-height: 1.2; letter-spacing: 0.02em; }
+.h-sub  { color: rgba(255,255,255,0.6); font-size: 10.5px; font-weight: 300; letter-spacing: 0.04em; text-transform: uppercase; margin-top: 1px; }
+.h-online { display: flex; align-items: center; gap: 4px; margin-top: 3px; }
+.h-online::before { content:''; width:6px; height:6px; background:#4ade80; border-radius:50%; animation: pulse-dot 2.5s infinite; }
+.h-online span { font-size: 10px; color: rgba(255,255,255,0.52); }
+@keyframes pulse-dot { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.5);opacity:.5} }
 
-        .title-text p {
-            font-size: 12px;
-            opacity: 0.8;
-            margin: 0;
-        }
+.h-btns { display: flex; gap: 5px; z-index: 1; }
+.h-btn {
+  width: 28px; height: 28px; border-radius: 50%; border: none; cursor: pointer;
+  background: rgba(255,255,255,0.12); color: var(--white);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; transition: background var(--ease);
+}
+.h-btn:hover { background: rgba(255,255,255,0.22); }
 
-        .close-btn {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 28px;
-            cursor: pointer;
-            padding: 0;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 4px;
-            transition: background 0.2s ease;
-        }
+/* ── Messages ────────────────────────────────────────────────────────────── */
+#messages {
+  flex: 1; overflow-y: auto; padding: 14px; display: flex;
+  flex-direction: column; gap: 10px; background: var(--off);
+  scroll-behavior: smooth;
+}
+#messages::-webkit-scrollbar { width: 3px; }
+#messages::-webkit-scrollbar-thumb { background: #c8d5e0; border-radius: 2px; }
 
-        .close-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
+.msg-row { display: flex; align-items: flex-end; gap: 8px; animation: msg-pop 0.22s ease; }
+@keyframes msg-pop { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+.msg-row.user { flex-direction: row-reverse; }
 
-        .close-btn:active {
-            background: rgba(255, 255, 255, 0.3);
-        }
+.msg-av {
+  width: 26px; height: 26px; border-radius: 50%; overflow: hidden;
+  flex-shrink: 0; border: 1px solid rgba(13,48,85,0.12);
+}
+.msg-av img { width: 100%; height: 100%; object-fit: cover; }
+.msg-av.user-av { background: var(--teal); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: var(--white); }
 
-        .chat-body {
-            flex: 1;
-            overflow-y: auto;
-            padding: 20px;
-            background: #f7f7f7;
-        }
+.msg-bubble {
+  max-width: 79%; padding: 10px 13px; border-radius: 16px;
+  font-size: 13.5px; line-height: 1.62; word-break: break-word;
+}
+.msg-row.bot  .msg-bubble { background: var(--white); border: 1px solid var(--border); border-bottom-left-radius: 4px; color: var(--text); box-shadow: var(--shadow-sm); }
+.msg-row.user .msg-bubble { background: linear-gradient(135deg, var(--navy-mid), var(--navy-light)); border-bottom-right-radius: 4px; color: var(--white); }
 
-        .message {
-            margin-bottom: 16px;
-            display: flex;
-            animation: slideIn 0.3s ease-out;
-        }
+.msg-bubble a { color: var(--teal); text-decoration: underline; }
+.msg-row.user .msg-bubble a { color: #a8e6ff; }
 
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
+.msg-time { font-size: 10px; color: var(--light-txt); margin-top: 3px; }
+.msg-row.user .msg-time { text-align: right; }
 
-        .message.assistant {
-            justify-content: flex-start;
-        }
+/* typing */
+.typing-dots { display: flex; gap: 4px; align-items: center; padding: 2px 0; }
+.typing-dots span { width: 6px; height: 6px; background: var(--light-txt); border-radius: 50%; animation: bounce 1.3s infinite ease-in-out; }
+.typing-dots span:nth-child(2){animation-delay:.18s}
+.typing-dots span:nth-child(3){animation-delay:.36s}
+@keyframes bounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-6px)} }
 
-        .message.user {
-            justify-content: flex-end;
-        }
+/* chips */
+.chip-row { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 14px 10px; flex-shrink: 0; }
+.chip {
+  padding: 5px 12px; border: 1px solid var(--navy-mid); border-radius: 20px;
+  font-size: 12px; color: var(--navy-mid); background: transparent;
+  cursor: pointer; font-family: 'DM Sans', sans-serif;
+  transition: all var(--ease); white-space: nowrap;
+}
+.chip:hover { background: var(--navy-mid); color: var(--white); }
 
-        .message-bubble {
-            max-width: 80%;
-            padding: 12px 16px;
-            border-radius: 16px;
-            word-wrap: break-word;
-            line-height: 1.4;
-            font-size: 14px;
-        }
+/* input row */
+.input-row {
+  display: flex; gap: 8px; align-items: center;
+  padding: 11px 13px; border-top: 1px solid var(--border); flex-shrink: 0; background: var(--white);
+}
+#chat-input {
+  flex: 1; border: 1px solid var(--border); border-radius: 22px;
+  padding: 9px 15px; font-size: 13px; font-family: 'DM Sans', sans-serif;
+  background: var(--off); color: var(--text); outline: none; transition: border-color var(--ease);
+}
+#chat-input:focus { border-color: var(--navy-mid); background: var(--white); }
+#chat-input::placeholder { color: var(--light-txt); }
+.send-btn {
+  width: 36px; height: 36px; border-radius: 50%; border: none; cursor: pointer;
+  background: linear-gradient(135deg, var(--navy-mid), var(--navy-light));
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; transition: transform var(--ease), opacity var(--ease);
+}
+.send-btn:hover { transform: scale(1.08); }
+.send-btn:disabled { opacity: 0.45; cursor: default; transform: none; }
+.send-btn svg { width: 15px; height: 15px; fill: var(--white); }
 
-        .assistant .message-bubble {
-            background: #e8e8e8;
-            color: #333;
-            border-radius: 16px 16px 16px 2px;
-        }
-
-        .user .message-bubble {
-            background: #0f3c7d;
-            color: white;
-            border-radius: 16px 16px 2px 16px;
-        }
-
-        .typing-indicator {
-            display: flex;
-            gap: 4px;
-            padding: 12px 16px;
-            background: #e8e8e8;
-            border-radius: 16px 16px 16px 2px;
-            width: fit-content;
-        }
-
-        .typing-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #999;
-            animation: typing 1.4s infinite;
-        }
-
-        .typing-dot:nth-child(2) {
-            animation-delay: 0.2s;
-        }
-
-        .typing-dot:nth-child(3) {
-            animation-delay: 0.4s;
-        }
-
-        @keyframes typing {
-            0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
-            30% { opacity: 1; transform: translateY(-10px); }
-        }
-
-        .chat-footer {
-            padding: 16px;
-            background: white;
-            border-top: 1px solid #e0e0e0;
-            display: flex;
-            gap: 8px;
-        }
-
-        .input-group {
-            display: flex;
-            gap: 8px;
-            flex: 1;
-        }
-
-        input[type="text"] {
-            flex: 1;
-            border: 1px solid #d0d0d0;
-            border-radius: 20px;
-            padding: 12px 16px;
-            font-size: 14px;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-
-        input[type="text"]:focus {
-            border-color: #0f3c7d;
-        }
-
-        button {
-            background: #0f3c7d;
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 36px;
-            height: 36px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            transition: background 0.2s;
-        }
-
-        button:hover {
-            background: #0a2c5e;
-        }
-
-        button:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 20px;
-            color: #999;
-        }
-
-        .error-message {
-            background: #fee;
-            color: #c33;
-            padding: 12px;
-            border-radius: 8px;
-            margin: 10px 0;
-            font-size: 13px;
-        }
-    </style>
+/* identity prompt styling */
+.identity-hint {
+  background: linear-gradient(135deg, rgba(13,48,85,0.06), rgba(26,90,138,0.06));
+  border: 1px solid rgba(13,48,85,0.12); border-radius: var(--r-sm);
+  padding: 10px 13px; margin: 0 14px 10px; font-size: 12px; color: var(--muted);
+  text-align: center; flex-shrink: 0;
+}
+.identity-hint strong { color: var(--navy-mid); }
+</style>
 </head>
 <body>
-    <div class="chat-widget">
-        <!-- Header -->
-        <div class="chat-header">
-            <div class="header-title">
-                <div class="avatar">U</div>
-                <div class="title-text">
-                    <h2>UMKOV</h2>
-                    <p>🟢 Online 24/7</p>
-                </div>
-            </div>
-            <button class="close-btn" id="closeBtn" aria-label="Close chat">✕</button>
-        </div>
 
-        <!-- Chat Body -->
-        <div class="chat-body" id="chatBody">
-            <div class="loading">Loading conversation...</div>
-        </div>
+<!-- ── Launcher ────────────────────────────────────────────────────────────── -->
+<button id="shaina-launcher" onclick="toggleWidget()" aria-label="Chat with Shaina">
+  <div class="lnch-avatar">
+    <!-- Replace src with your actual profile picture URL or base64 -->
+    <img src="https://arya-v1-0-0.onrender.com/static/shaina-avatar.jpg"
+         onerror="this.style.display='none';this.parentElement.innerHTML='<span style=\'font-family:Cormorant Garamond,serif;font-size:18px;font-weight:600;color:#fff;display:flex;align-items:center;justify-content:center;height:100%\'>S</span>'"
+         alt="Shaina">
+    <div class="lnch-pulse"></div>
+  </div>
+  <div class="lnch-text">
+    <strong>Chat with Shaina</strong>
+    <span>MKOV Travel Assistant</span>
+  </div>
+</button>
 
-        <!-- Chat Footer -->
-        <div class="chat-footer">
-            <div class="input-group">
-                <input 
-                    type="text" 
-                    id="messageInput" 
-                    placeholder="Ask about destinations, packages, visas..." 
-                    autocomplete="off"
-                >
-                <button id="sendBtn" aria-label="Send message">➤</button>
-            </div>
-        </div>
+<!-- ── Widget panel ────────────────────────────────────────────────────────── -->
+<div id="shaina-widget" role="dialog" aria-label="Shaina Travel Chatbot">
+
+  <!-- Header -->
+  <div class="s-header">
+    <div class="h-avatar">
+      <img src="https://arya-v1-0-0.onrender.com/static/shaina-avatar.jpg"
+           onerror="this.style.display='none'"
+           alt="Shaina">
     </div>
+    <div class="h-info">
+      <div class="h-name">Shaina</div>
+      <div class="h-online"><span>Online 24 / 7</span></div>
+      <div class="h-sub">Uniglobe MKOV Travel</div>
+    </div>
+    <div class="h-btns">
+      <!-- Minimise button -->
+      <button class="h-btn" onclick="minimiseWidget()" title="Minimise" aria-label="Minimise">—</button>
+      <!-- Close button -->
+      <button class="h-btn" onclick="closeWidget()" title="Close" aria-label="Close">✕</button>
+    </div>
+  </div>
 
-    <script>
-        const API_BASE = 'https://arya-v1-0-0.onrender.com';
-        const chatBody = document.getElementById('chatBody');
-        const messageInput = document.getElementById('messageInput');
-        const sendBtn = document.getElementById('sendBtn');
-        const closeBtn = document.getElementById('closeBtn');
+  <!-- Messages -->
+  <div id="messages"></div>
 
-        let sessionId = localStorage.getItem('umkov_session_id') || generateSessionId();
-        localStorage.setItem('umkov_session_id', sessionId);
+  <!-- Identity hint (shown before name+phone given) -->
+  <div class="identity-hint" id="id-hint" style="display:none">
+    Please share your <strong>Name, Phone Number</strong> to continue.
+  </div>
 
-        function generateSessionId() {
-            return 'session_' + Math.random().toString(36).substr(2, 9);
-        }
+  <!-- Quick chips -->
+  <div class="chip-row" id="chip-row"></div>
 
-        // Load initial greeting
-        window.addEventListener('load', async () => {
-            chatBody.innerHTML = '';
-            addAssistantMessage('Welcome to UMKOV! 👋\n\nI\'m your travel assistant. What kind of trip are you dreaming of?');
-        });
+  <!-- Input -->
+  <div class="input-row">
+    <input id="chat-input" type="text"
+           placeholder="Type here…"
+           onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage();}">
+    <button class="send-btn" id="send-btn" onclick="sendMessage()" aria-label="Send">
+      <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg>
+    </button>
+  </div>
+</div>
 
-        // Send message on Enter or button click
-        messageInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                sendMessage();
-            }
-        });
+<script>
+// ══════════════════════════════════════════════════════════════════
+// CONFIG — UPDATE THIS URL TO YOUR RENDER BACKEND
+// ══════════════════════════════════════════════════════════════════
+const API_BASE = 'https://arya-v1-0-0.onrender.com';
 
-        sendBtn.addEventListener('click', sendMessage);
-        closeBtn.addEventListener('click', closeChat);
+// ── State ─────────────────────────────────────────────────────────
+let sessionId    = 'web-' + Math.random().toString(36).substr(2,10);
+let isTyping     = false;
+let identityGiven = false;
+let isMinimised  = false;
 
-        async function sendMessage() {
-            const message = messageInput.value.trim();
-            if (!message) return;
+// ── Init on load ──────────────────────────────────────────────────
+window.addEventListener('load', () => {
+  // If inside WP iframe: auto-open panel, hide launcher
+  if (window.parent !== window) {
+    document.getElementById('shaina-launcher').style.display = 'none';
+    openPanel();
+  }
+  setTimeout(showWelcome, 400);
+});
 
-            messageInput.value = '';
-            addUserMessage(message);
-            showTypingIndicator();
+// ── postMessage from WordPress parent page ────────────────────────
+window.addEventListener('message', function(e) {
+  if (!e.data) return;
+  if (e.data.action === 'open_shaina')   { openPanel(); }
+  if (e.data.action === 'close_shaina')  { closeWidget(); }
+});
 
-            try {
-                const response = await fetch(`${API_BASE}/widget/chat`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        message: message,
-                        session_id: sessionId
-                    })
-                });
+function showWelcome() {
+  appendBot(
+    'Hi there! 👋 Before we get started, I need your name and phone number ' +
+    'so our team can assist you better.\n\n' +
+    'Please reply in this format:\n**Name, Phone_Number**\n\n' +
+    'Example: Rahul Sharma, 9876543210'
+  );
+  document.getElementById('id-hint').style.display = 'block';
+  document.getElementById('chat-input').placeholder = 'Name, Phone_Number';
+}
 
-                const data = await response.json();
-                removeTypingIndicator();
+// ══════════════════════════════════════════════════════════════════
+// WIDGET OPEN / CLOSE / MINIMISE
+// ══════════════════════════════════════════════════════════════════
+function toggleWidget() {
+  const w = document.getElementById('shaina-widget');
+  if (w.classList.contains('open')) {
+    closeWidget();
+  } else {
+    openPanel();
+  }
+}
 
-                if (data.reply) {
-                    addAssistantMessage(data.reply);
-                } else {
-                    addAssistantMessage('Sorry, I didn\'t get that. Could you try again?');
-                }
-            } catch (error) {
-                removeTypingIndicator();
-                console.error('Error:', error);
-                addAssistantMessage('I\'m having trouble connecting. Please try again or call +91-120-XXXXXX. 📞');
-            }
-        }
+function openPanel() {
+  isMinimised = false;
+  const w = document.getElementById('shaina-widget');
+  w.classList.add('open');
+  document.getElementById('shaina-launcher').style.display = 'none';
+  setTimeout(() => document.getElementById('chat-input').focus(), 300);
+}
 
-        function addUserMessage(text) {
-            const div = document.createElement('div');
-            div.className = 'message user';
-            div.innerHTML = `<div class="message-bubble">${escapeHtml(text)}</div>`;
-            chatBody.appendChild(div);
-            scrollToBottom();
-        }
+function minimiseWidget() {
+  // Collapse widget but keep launcher visible so user can reopen
+  isMinimised = true;
+  document.getElementById('shaina-widget').classList.remove('open');
+  document.getElementById('shaina-launcher').style.display = 'flex';
+  // Tell parent WP page to shrink iframe back to 0×0
+  if (window.parent !== window) {
+    window.parent.postMessage({ action: 'close_shaina' }, '*');
+  }
+}
 
-        function addAssistantMessage(text) {
-            const div = document.createElement('div');
-            div.className = 'message assistant';
-            div.innerHTML = `<div class="message-bubble">${escapeHtml(text)}</div>`;
-            chatBody.appendChild(div);
-            scrollToBottom();
-        }
+function closeWidget() {
+  minimiseWidget(); // same behaviour — collapse + show launcher
+}
 
-        function showTypingIndicator() {
-            const div = document.createElement('div');
-            div.className = 'message assistant';
-            div.id = 'typingIndicator';
-            div.innerHTML = '<div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';
-            chatBody.appendChild(div);
-            scrollToBottom();
-        }
+// ══════════════════════════════════════════════════════════════════
+// CHAT
+// ══════════════════════════════════════════════════════════════════
+async function sendMessage() {
+  const input = document.getElementById('chat-input');
+  const text  = input.value.trim();
+  if (!text || isTyping) return;
+  input.value = '';
+  clearChips();
+  appendUser(text);
+  showTyping();
 
-        function removeTypingIndicator() {
-            const indicator = document.getElementById('typingIndicator');
-            if (indicator) indicator.remove();
-        }
+  try {
+    const res = await fetch(`${API_BASE}/widget/chat`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ message: text, session_id: sessionId }),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
 
-        function scrollToBottom() {
-            chatBody.scrollTop = chatBody.scrollHeight;
-        }
+    hideTyping();
+    appendBot(data.reply);
 
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
+    if (data.session_id) sessionId = data.session_id;
 
-        function closeChat() {
-            if (window.parent !== window) {
-                // Running in iframe — close parent
-                window.parent.postMessage({ action: 'close' }, '*');
-            } else {
-                // Running standalone — redirect or hide
-                window.location.href = '/';
-            }
-        }
+    // Update identity state
+    if (data.identity_given) {
+      identityGiven = true;
+      document.getElementById('id-hint').style.display = 'none';
+      document.getElementById('chat-input').placeholder = 'Ask about destinations, packages, visas…';
+    }
 
-        // Listen for close messages from parent
-        window.addEventListener('message', (event) => {
-            if (event.data.action === 'close') {
-                document.body.style.display = 'none';
-            }
-        });
-    </script>
+    // Chips from suggested actions
+    if (data.suggested_actions && data.suggested_actions.length) {
+      setChips(data.suggested_actions.slice(0,3).map(a => a.label));
+    } else if (identityGiven) {
+      setChips(['Goa packages 🌊', 'Dubai trip ✈️', 'Honeymoon packages 💑', 'Talk to agent 📞']);
+    }
+
+  } catch(err) {
+    hideTyping();
+    console.error('Shaina error:', err);
+    appendBot(
+      'I\'m having a brief connection issue. 🙏 ' +
+      'Please try again, or call us at **+91-9999-XXXXXX**.'
+    );
+  }
+}
+
+function sendChip(label) {
+  document.getElementById('chat-input').value = label;
+  sendMessage();
+}
+
+// ══════════════════════════════════════════════════════════════════
+// MESSAGE RENDERING
+// ══════════════════════════════════════════════════════════════════
+const AVATAR_URL = 'https://arya-v1-0-0.onrender.com/static/shaina-avatar.jpg';
+
+function appendBot(text) {
+  isTyping = false;
+  document.getElementById('send-btn').disabled = false;
+  const msgs = document.getElementById('messages');
+  const now  = new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+  const row  = document.createElement('div');
+  row.className = 'msg-row bot';
+  row.innerHTML = `
+    <div class="msg-av">
+      <img src="${AVATAR_URL}" onerror="this.parentElement.innerHTML='<span style=\\'font-family:serif;font-size:12px;font-weight:600;color:#fff;display:flex;align-items:center;justify-content:center;height:100%;background:#1a5a8a;border-radius:50%\\'>S</span>'" alt="S">
+    </div>
+    <div>
+      <div class="msg-bubble">${fmt(text)}</div>
+      <div class="msg-time">${now}</div>
+    </div>`;
+  msgs.appendChild(row);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function appendUser(text) {
+  const msgs = document.getElementById('messages');
+  const now  = new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+  const row  = document.createElement('div');
+  row.className = 'msg-row user';
+  row.innerHTML = `
+    <div>
+      <div class="msg-bubble">${esc(text)}</div>
+      <div class="msg-time">${now}</div>
+    </div>
+    <div class="msg-av user-av">U</div>`;
+  msgs.appendChild(row);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function showTyping() {
+  isTyping = true;
+  document.getElementById('send-btn').disabled = true;
+  const msgs = document.getElementById('messages');
+  const row  = document.createElement('div');
+  row.className = 'msg-row bot'; row.id = 'typing-row';
+  row.innerHTML = `
+    <div class="msg-av">
+      <img src="${AVATAR_URL}" onerror="this.parentElement.innerHTML='<span style=\\'font-size:12px;font-weight:600;color:#fff;display:flex;align-items:center;justify-content:center;height:100%;background:#1a5a8a;border-radius:50%\\'>S</span>'" alt="S">
+    </div>
+    <div><div class="msg-bubble"><div class="typing-dots"><span></span><span></span><span></span></div></div></div>`;
+  msgs.appendChild(row);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function hideTyping() {
+  const r = document.getElementById('typing-row');
+  if (r) r.remove();
+}
+
+function setChips(labels) {
+  const row = document.getElementById('chip-row');
+  row.innerHTML = '';
+  labels.forEach(l => {
+    const b = document.createElement('button');
+    b.className = 'chip'; b.textContent = l;
+    b.onclick = () => sendChip(l);
+    row.appendChild(b);
+  });
+}
+
+function clearChips() {
+  document.getElementById('chip-row').innerHTML = '';
+}
+
+// ══════════════════════════════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════════════════════════════
+function esc(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function fmt(text) {
+  return esc(text)
+    .replace(/\n/g, '<br>')
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    // Convert markdown links [text](url) to real links
+    .replace(/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g,
+      '<a href="$2" target="_blank" rel="noopener">$1</a>')
+    // Auto-link bare URLs
+    .replace(/(^|[\s<br>])(https?:\/\/[^\s<]+)/g,
+      '$1<a href="$2" target="_blank" rel="noopener">$2</a>');
+}
+</script>
 </body>
 </html>
