@@ -508,15 +508,29 @@ function toggleWidget() {
   const w = document.getElementById('UMKOV-widget');
   const isNowOpen = w.classList.toggle('open');
   if (isNowOpen) {
-    // Widget just opened — focus input
     setTimeout(() => document.getElementById('chat-input').focus(), 300);
   } else {
-    // Widget just closed — tell parent WordPress page to hide iframe + show launcher
+    // Tell parent (WordPress page) to collapse iframe and show launcher button
     if (window.parent !== window) {
       window.parent.postMessage({ action: 'close_umkov' }, '*');
     }
   }
 }
+
+// Listen for open_umkov message from parent WordPress page
+// This opens the widget panel when the launcher button is clicked
+window.addEventListener('message', function(e) {
+  if (e.data && e.data.action === 'open_umkov') {
+    const w = document.getElementById('UMKOV-widget');
+    if (!w.classList.contains('open')) {
+      w.classList.add('open');
+      setTimeout(() => {
+        const inp = document.getElementById('chat-input');
+        if (inp) inp.focus();
+      }, 300);
+    }
+  }
+});
 
 // ── View switching ────────────────────────────────────────────────────────
 function switchView(view) {
@@ -806,6 +820,24 @@ function formatMessage(text) {
     .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
     .replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" style="color:var(--teal);text-decoration:underline">$1</a>');
 }
+</script>
+
+<script>
+// When running inside a WordPress iframe, hide the internal launcher button
+// because the WordPress page has its own launcher button outside the iframe.
+// The widget panel opens/closes via postMessage from the parent page.
+(function() {
+  if (window.parent !== window) {
+    var style = document.createElement('style');
+    style.textContent = '#UMKOV-launcher { display: none !important; }';
+    document.head.appendChild(style);
+    // Also start with widget open so user sees chat immediately when iframe expands
+    window.addEventListener('load', function() {
+      var w = document.getElementById('UMKOV-widget');
+      if (w) w.classList.add('open');
+    });
+  }
+})();
 </script>
 </body>
 </html>
