@@ -1,287 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UMKOV — Travel Assistant</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .chat-widget {
-            width: 100%;
-            max-width: 460px;
-            height: 700px;
-            background: #ffffff;
-            border-radius: 12px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .chat-header {
-            background: linear-gradient(135deg, #0f3c7d 0%, #1a5a96 100%);
-            color: white;
-            padding: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .header-title {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 20px;
-        }
-
-        .title-text h2 {
-            font-size: 16px;
-            margin: 0;
-            font-weight: 600;
-        }
-
-        .title-text p {
-            font-size: 12px;
-            opacity: 0.8;
-            margin: 0;
-        }
-
-        .close-btn {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 28px;
-            cursor: pointer;
-            padding: 0;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 4px;
-            transition: background 0.2s ease;
-        }
-
-        .close-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-
-        .close-btn:active {
-            background: rgba(255, 255, 255, 0.3);
-        }
-
-        .chat-body {
-            flex: 1;
-            overflow-y: auto;
-            padding: 20px;
-            background: #f7f7f7;
-        }
-
-        .message {
-            margin-bottom: 16px;
-            display: flex;
-            animation: slideIn 0.3s ease-out;
-        }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .message.assistant {
-            justify-content: flex-start;
-        }
-
-        .message.user {
-            justify-content: flex-end;
-        }
-
-        .message-bubble {
-            max-width: 80%;
-            padding: 12px 16px;
-            border-radius: 16px;
-            word-wrap: break-word;
-            line-height: 1.4;
-            font-size: 14px;
-        }
-
-        .assistant .message-bubble {
-            background: #e8e8e8;
-            color: #333;
-            border-radius: 16px 16px 16px 2px;
-        }
-
-        .user .message-bubble {
-            background: #0f3c7d;
-            color: white;
-            border-radius: 16px 16px 2px 16px;
-        }
-
-        .typing-indicator {
-            display: flex;
-            gap: 4px;
-            padding: 12px 16px;
-            background: #e8e8e8;
-            border-radius: 16px 16px 16px 2px;
-            width: fit-content;
-        }
-
-        .typing-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #999;
-            animation: typing 1.4s infinite;
-        }
-
-        .typing-dot:nth-child(2) {
-            animation-delay: 0.2s;
-        }
-
-        .typing-dot:nth-child(3) {
-            animation-delay: 0.4s;
-        }
-
-        @keyframes typing {
-            0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
-            30% { opacity: 1; transform: translateY(-10px); }
-        }
-
-        .chat-footer {
-            padding: 16px;
-            background: white;
-            border-top: 1px solid #e0e0e0;
-            display: flex;
-            gap: 8px;
-        }
-
-        .input-group {
-            display: flex;
-            gap: 8px;
-            flex: 1;
-        }
-
-        input[type="text"] {
-            flex: 1;
-            border: 1px solid #d0d0d0;
-            border-radius: 20px;
-            padding: 12px 16px;
-            font-size: 14px;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-
-        input[type="text"]:focus {
-            border-color: #0f3c7d;
-        }
-
-        button {
-            background: #0f3c7d;
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 36px;
-            height: 36px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            transition: background 0.2s;
-        }
-
-        button:hover {
-            background: #0a2c5e;
-        }
-
-        button:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 20px;
-            color: #999;
-        }
-
-        .error-message {
-            background: #fee;
-            color: #c33;
-            padding: 12px;
-            border-radius: 8px;
-            margin: 10px 0;
-            font-size: 13px;
-        }
-    </style>
-</head>
-<body>
-    <div class="chat-widget">
-        <!-- Header -->
-        <div class="chat-header">
-            <div class="header-title">
-                <div class="avatar">U</div>
-                <div class="title-text">
-                    <h2>UMKOV</h2>
-                    <p>🟢 Online 24/7</p>
-                </div>
-            </div>
-            <button class="close-btn" id="closeBtn" aria-label="Close chat">✕</button>
-        </div>
-
-        <!-- Chat Body -->
-        <div class="chat-body" id="chatBody">
-            <div class="loading">Loading conversation...</div>
-        </div>
-
-        <!-- Chat Footer -->
-        <div class="chat-footer">
-            <div class="input-group">
-                <input 
-                    type="text" 
-                    id="messageInput" 
-                    placeholder="Ask about destinations, packages, visas..." 
-                    autocomplete="off"
-                >
-                <button id="sendBtn" aria-label="Send message">➤</button>
-            </div>
-        </div>
-    </div>
-
-    <script>
+<script>
         const API_BASE = 'https://arya-v1-0-0.onrender.com';
         const chatBody = document.getElementById('chatBody');
         const messageInput = document.getElementById('messageInput');
@@ -295,13 +12,11 @@
             return 'session_' + Math.random().toString(36).substr(2, 9);
         }
 
-        // Load initial greeting
         window.addEventListener('load', async () => {
             chatBody.innerHTML = '';
             addAssistantMessage('Welcome to UMKOV! 👋\n\nI\'m your travel assistant. What kind of trip are you dreaming of?');
         });
 
-        // Send message on Enter or button click
         messageInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
@@ -310,7 +25,16 @@
         });
 
         sendBtn.addEventListener('click', sendMessage);
-        closeBtn.addEventListener('click', closeChat);
+        
+        // Correctly maps the button click event straight to the parent listener sequence
+        closeBtn.addEventListener('click', function(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            if (window.parent !== window) {
+                // Corrected to match the 'close_umkov' keyword explicitly
+                window.parent.postMessage({ action: 'close_umkov' }, '*');
+            }
+        });
 
         async function sendMessage() {
             const message = messageInput.value.trim();
@@ -384,35 +108,4 @@
             div.textContent = text;
             return div.innerHTML;
         }
-        // Locate your cross/close element identifier
-        const closeBtn = document.getElementById('close-widget-btn') || document.querySelector('.close-icon');
-        if (closeBtn) {
-            closeBtn.addEventListener('click', function(event) {
-                event.preventDefault();
-                event.stopPropagation();
-                // Minimize/Hide internally 
-                document.getElementById('umkov-chat-window').style.display = 'none';
-                // CRITICAL: Shout to the parent WordPress page to shrink the iframe window wrapper
-                window.parent.postMessage({ action: 'close_umkov_widget' }, '*');
-            });
-        }
-
-        function closeChat() {
-            if (window.parent !== window) {
-                // Running in iframe — close parent
-                window.parent.postMessage({ action: 'close' }, '*');
-            } else {
-                // Running standalone — redirect or hide
-                window.location.href = '/';
-            }
-        }
-
-        // Listen for close messages from parent
-        window.addEventListener('message', (event) => {
-            if (event.data.action === 'close') {
-                document.body.style.display = 'none';
-            }
-        });
     </script>
-</body>
-</html>
