@@ -4,8 +4,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # ── Operator contact — shown when user wants to talk to a human ──────────────
-OPERATOR_PHONE   = "+91-9999-XXXXXX"   # ← CHANGE THIS to the real number
-OPERATOR_WHATSAPP = "https://wa.me/91XXXXXXXXXX"  # ← CHANGE THIS
+OPERATOR_PHONE   = "+918010700700"   # ← CHANGE THIS to the real number
+OPERATOR_WHATSAPP = "https://wa.me/918010700700"  # ← CHANGE THIS
 
 # ── System Prompt ─────────────────────────────────────────────────────────────
 SYSTEM_PROMPT = f"""
