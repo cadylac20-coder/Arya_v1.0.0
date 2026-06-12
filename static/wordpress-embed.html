@@ -1,6 +1,6 @@
 <script>
 /*
- * Shaina — MKOV Travel Assistant
+ * Shanaya — MKOV Travel Assistant
  * WordPress Footer Embed Script v3.0
  * Paste this ALONE into WPCode footer section.
  * Remove ALL previous embed scripts first.
@@ -12,8 +12,8 @@
   /* ── iframe: starts at 0×0 — zero interference with popups ──────── */
   var iframe = document.createElement('iframe');
   iframe.src   = RENDER_URL;
-  iframe.id    = 'shaina-iframe';
-  iframe.title = 'Shaina — MKOV Travel Assistant';
+  iframe.id    = 'Shanaya-iframe';
+  iframe.title = 'Shanaya — MKOV Travel Assistant';
   iframe.setAttribute('allow', 'microphone');
   iframe.style.cssText = [
     'position:fixed',
@@ -31,7 +31,7 @@
   /* ── Launcher button styles ──────────────────────────────────────── */
   var style = document.createElement('style');
   style.textContent = [
-    '#shaina-open-btn{',
+    '#Shanaya-open-btn{',
       'position:fixed;bottom:24px;right:24px;z-index:99999;',
       'display:flex;align-items:center;gap:10px;',
       'background:linear-gradient(135deg,#0d3055,#1a5a8a);',
@@ -42,7 +42,7 @@
       'transition:transform .2s,box-shadow .2s;',
       'user-select:none;',
     '}',
-    '#shaina-open-btn:hover{transform:translateY(-3px);box-shadow:0 14px 40px rgba(13,48,85,.40);}',
+    '#Shanaya-open-btn:hover{transform:translateY(-3px);box-shadow:0 14px 40px rgba(13,48,85,.40);}',
     '.sav{width:38px;height:38px;border-radius:50%;overflow:hidden;border:2px solid rgba(255,255,255,.3);flex-shrink:0;position:relative;background:#2678b5;}',
     '.sav img{width:100%;height:100%;object-fit:cover;}',
     '.sav-pulse{position:absolute;bottom:0;right:0;width:10px;height:10px;background:#4ade80;border-radius:50%;border:2px solid #fff;animation:sp 2.5s ease-in-out infinite;}',
@@ -51,25 +51,25 @@
     '.slbl strong{font-size:13.5px;font-weight:500;}',
     '.slbl span{font-size:10.5px;opacity:.72;font-weight:300;}',
     '@media(max-width:520px){',
-      '#shaina-open-btn{right:12px;bottom:12px;padding:9px 15px 9px 9px;}',
-      '#shaina-open-btn .slbl span{display:none;}',
+      '#Shanaya-open-btn{right:12px;bottom:12px;padding:9px 15px 9px 9px;}',
+      '#Shanaya-open-btn .slbl span{display:none;}',
     '}',
   ].join('');
   document.head.appendChild(style);
 
   /* ── Launcher button ─────────────────────────────────────────────── */
   var btn = document.createElement('button');
-  btn.id = 'shaina-open-btn';
-  btn.setAttribute('aria-label', 'Chat with Shaina — MKOV Travel Assistant');
+  btn.id = 'Shanaya-open-btn';
+  btn.setAttribute('aria-label', 'Chat with Shanaya — MKOV Travel Assistant');
   btn.innerHTML = [
     '<div class="sav">',
-      '<img src="https://arya-v1-0-0.onrender.com/static/shaina-avatar.jpg"',
+      '<img src="https://arya-v1-0-0.onrender.com/static/Shanaya-avatar.jpg"',
            'onerror="this.style.display=\'none\'"',
-           'alt="Shaina">',
+           'alt="Shanaya">',
       '<div class="sav-pulse"></div>',
     '</div>',
     '<div class="slbl">',
-      '<strong>Chat with Shaina</strong>',
+      '<strong>Chat with Shanaya</strong>',
       '<span>MKOV Travel Assistant</span>',
     '</div>',
   ].join('');
@@ -85,7 +85,7 @@
     iframe.style.height        = w ? '92vh'   : '720px';
     iframe.style.pointerEvents = 'all';
     btn.style.display          = 'none';
-    iframe.contentWindow.postMessage({ action: 'open_shaina' }, '*');
+    iframe.contentWindow.postMessage({ action: 'open_Shanaya' }, '*');
   }
 
   function closeChat() {
@@ -100,7 +100,7 @@
 
   /* Listen for minimise/close from inside widget.html */
   window.addEventListener('message', function (e) {
-    if (e.data && (e.data.action === 'close_shaina' || e.data.action === 'close_umkov')) {
+    if (e.data && (e.data.action === 'close_Shanaya' || e.data.action === 'close_umkov')) {
       closeChat();
     }
   });
