@@ -1,5 +1,5 @@
 """
-MKOV Shaina Travel AI — FastAPI Backend v2.0
+MKOV Shanaya Travel AI — FastAPI Backend v2.0
 """
 
 import os
@@ -23,8 +23,8 @@ from config import ALLOWED_ORIGINS
 init_db()
 
 app = FastAPI(
-    title="MKOV Shaina Travel AI",
-    description="AI travel assistant for Uniglobe MKOV — Shaina",
+    title="MKOV Shanaya Travel AI",
+    description="AI travel assistant for Uniglobe MKOV — Shanaya",
     version="2.0.0",
     docs_url="/docs",
 )
@@ -79,7 +79,7 @@ class ActionResponse(BaseModel):
 
 @app.get("/")
 def root():
-    return {"status": "online", "service": "MKOV Shaina v2.0", "chatbot": "Shaina"}
+    return {"status": "online", "service": "MKOV Shanaya v2.0", "chatbot": "Shanaya"}
 
 @app.get("/health")
 def health():
